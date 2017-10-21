@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -18,7 +20,7 @@ class Item(models.Model):
 
 class Bucket(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
-    items = models.ManyToManyField(Item, verbose_name="bucket_items")
+    items = models.TextField(default="")
 
     def __len__(self):
-        return len(self.items.all())
+        return len(list(json.loads(self.items)))

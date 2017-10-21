@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -11,9 +13,12 @@ from store.models import Item, Bucket
 
 def add_to_bucket(request):
     # TODO Changing number in card onSuccess of ajax query
-    bucket = Bucket.objects.get(user=request.user)
     item_id = request.GET.get('id', None)
-    bucket.items.add(item_id)
+    bucket = Bucket.objects.get(user=request.user)
+    json_list = json.loads(bucket.items)
+    json_list.append(item_id)
+    bucket.items = json.dumps(json_list)
+    bucket.save()
     data = {
         'is_added': "success"
     }
@@ -23,7 +28,10 @@ def add_to_bucket(request):
 @login_required
 def user_bucket(request):
     bucket = Bucket.objects.get(user=request.user)
-    items_list = bucket.items.all()
+    ids_list = json.loads(bucket.items)
+    items_list = list()
+    for id in ids_list:
+        items_list.append(Item.objects.get(id=id))
     context = {
         "items_list": items_list,
         "title": "Bucket of " + request.user.username,
@@ -54,6 +62,7 @@ def sign_up(request):
     new_user.save()
     bucket = Bucket.objects.create()
     bucket.user = new_user
+    bucket.items = json.dumps(list())
     bucket.save()
     return redirect('store:login')
 
@@ -86,7 +95,7 @@ def store_main(request):
     items_list = Item.objects.all().order_by("price")
     paginator = Paginator(items_list, 9)  # Show 25 contacts per page
     user = request.user
-    user_bucket = Bucket.objects.get(user=user)
+    user_bckt = Bucket.objects.get(user=user)
     page_request_var = "page"
     page = request.GET.get('page')
     try:
@@ -100,7 +109,7 @@ def store_main(request):
     context = {
         "items_list": queryset,
         "title": "Store",
-        "user_bucket_size": len(user_bucket),
+        "user_bucket_size": len(user_bckt),
         "page_request_var": page_request_var,
     }
     return render(request, "store_list.html", context)
