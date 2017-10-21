@@ -6,18 +6,30 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from store.models import Item
+from store.models import Item, Bucket
 
 
 def add_to_bucket(request):
-    # item_id = request.GET['id']
-    # print(item_id)
-    # return HttpResponse(1, content_type="text/html")
+    # TODO Changing number in card onSuccess of ajax query
+    bucket = Bucket.objects.get(user=request.user)
     item_id = request.GET.get('id', None)
+    bucket.items.add(item_id)
     data = {
         'is_added': "success"
     }
     return JsonResponse(data)
+
+
+@login_required
+def user_bucket(request):
+    bucket = Bucket.objects.get(user=request.user)
+    items_list = bucket.items.all()
+    context = {
+        "items_list": items_list,
+        "title": "Bucket of " + request.user.username,
+        "user_bucket_size": len(items_list),
+    }
+    return render(request, "store_list.html", context)
 
 
 def username_present(username):
@@ -40,8 +52,9 @@ def sign_up(request):
 
     new_user = User.objects.create_user(username, email, password)
     new_user.save()
-    pw = new_user.check_password(password)
-
+    bucket = Bucket.objects.create()
+    bucket.user = new_user
+    bucket.save()
     return redirect('store:login')
 
 
@@ -72,7 +85,8 @@ def login_manager(request):
 def store_main(request):
     items_list = Item.objects.all().order_by("price")
     paginator = Paginator(items_list, 9)  # Show 25 contacts per page
-
+    user = request.user
+    user_bucket = Bucket.objects.get(user=user)
     page_request_var = "page"
     page = request.GET.get('page')
     try:
@@ -86,6 +100,7 @@ def store_main(request):
     context = {
         "items_list": queryset,
         "title": "Store",
+        "user_bucket_size": len(user_bucket),
         "page_request_var": page_request_var,
     }
     return render(request, "store_list.html", context)

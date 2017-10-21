@@ -4,11 +4,24 @@
     {{ title }}
 {% endblock %}
 
+{% block styles %}
+    <style>
+        .bucket-btn {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            border-radius: 5px;
+            background: #eeeeee;
+            padding: 10px 20px;
+            font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+        }
+    </style>
+{% endblock %}
 {% block content %}
 
     <div class="col-sm-12">
         <div class="page-header col-sm-12"><h1>{{ title }}</h1></div>
-        <h1></h1>
         <hr>
         <div class="row">
             {% for item in items_list %}
@@ -22,7 +35,7 @@
                             </h5>
                             <p>{{ item.price }} $</p>
                             <p>{{ item.get_short_content|linebreaks|truncatechars:120 }}</p>
-                            <p><span class="buy-btn btn btn-primary" data="{{ item.id }}">buy</span></p>
+                            <p><span class="buy-btn btn btn-primary" data="{{ item.id }}">Add to bucket</span></p>
                         </div>
                     </div>
                 </div>
@@ -49,25 +62,27 @@
     </span>
         </div>
     </div>
-    <a href="{% url 'store:sign_out' %}" class="btn btn-info" style="position: absolute;top: 0;right: 0;margin: 20px;">Log out</a>
+    <a href="{% url 'store:sign_out' %}" class="btn btn-danger"
+       style="position: absolute;top: 0;right: 0;margin: 20px;">Log out</a>
+    <a href="{% url 'store:user_bucket' %}" class="bucket-btn"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> {{ user_bucket_size }}</a>
 {% endblock %}
 
 {% block ajax %}
     <script>
         $('.buy-btn').click(function () {
-            console.log(this.getAttribute('data'));
+{#            console.log(this.getAttribute('data'));#}
             $.ajax({
                 type: 'GET',
                 url: "{% url 'store:add_item' %}",
                 data: {'id': this.getAttribute('data')},
                 dataType: "json",
                 success: function (data) {
-                    if (data) {
-                        console.log(data['is_added'])
+                    if (data['is_added'] === "success") {
+                        $('.bucket-btn').text($('.bucket-btn').val() + 1)
                     }
                 }
             }).done(function (data) {
-{#                console.log("done data")#}
+                {#                console.log("done data")#}
             });
         });
     </script>
