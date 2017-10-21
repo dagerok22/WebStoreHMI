@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block head_title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="col-sm-12">
+        <div class="page-header col-sm-12"><h1>{{ title }}</h1></div>
+        <h1></h1>
+        <hr>
+        <div class="row">
+            {% for item in items_list %}
+                <div class="col-sm-4">
+                    <div class="thumbnail">
+                        {% if post.image %}
+                            <img src="{{ item.image.url }}" alt="" class="img-responsive">
+                        {% endif %}
+                        <div class="caption">
+                            <h5>{{ item.title }}
+                            </h5>
+                            <p>{{ item.price }} $</p>
+                            <p>{{ item.get_short_content|linebreaks|truncatechars:120 }}</p>
+                            <p><span class="buy-btn btn btn-primary" data="{{ item.id }}">buy</span></p>
+                        </div>
+                    </div>
+                </div>
+                {% if forloop.counter|divisibleby:3 %}</div>{% endif %}
+                {% if forloop.counter|divisibleby:3 %}
+                    <div class="row">{% endif %}
+            {% endfor %}
+            </div>
+        <div class="pagination">
+    <span class="step-links">
+        {% if items_list.has_previous %}
+            <a href="?{{ page_request_var }}={{ items_list.previous_page_number }}"><span
+                    class="btn btn-primary">previous</span></a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ items_list.number }} of {{ items_list.paginator.num_pages }}.
+        </span>
+
+        {% if items_list.has_next %}
+            <a href="?{{ page_request_var }}={{ items_list.next_page_number }}"><span
+                    class="btn btn-primary">next</span></a>
+        {% endif %}
+    </span>
+        </div>
+    </div>
+    <a href="{% url 'store:sign_out' %}" class="btn btn-info" style="position: absolute;top: 0;right: 0;margin: 20px;">Log out</a>
+{% endblock %}
+
+{% block ajax %}
+    <script>
+        $('.buy-btn').click(function () {
+            console.log(this.getAttribute('data'));
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'store:add_item' %}",
+                data: {'id': this.getAttribute('data')},
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        console.log(data['is_added'])
+                    }
+                }
+            }).done(function (data) {
+{#                console.log("done data")#}
+            });
+        });
+    </script>
+{% endblock %}
