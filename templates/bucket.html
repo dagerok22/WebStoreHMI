@@ -1,28 +1,113 @@
 {% extends 'base.html' %}
 
+{% block head_title %}
+    {{ title }}
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .delete_item {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+        }
+
+        .delete_item:hover {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
 {% block content %}
     <div class="com-sm-12">
         <div class="page-header col-sm-12"><h1>{{ title }}</h1></div>
         <hr>
         <div class="row">
-            <div class="col-sm-6">
-                {% for item in items_list %}
-                    <div class="col-sm-4">
-                        <div class="thumbnail">
-                            {% if post.image %}
-                                <img src="{{ item.image.url }}" alt="" class="img-responsive">
-                            {% endif %}
-                            <div class="caption">
-                                <h5>{{ item.title }}
-                                </h5>
-                                <p>{{ item.price }} $</p>
-                                <p>{{ item.get_short_content|linebreaks|truncatechars:120 }}</p>
-                            </div>
+            {% for item in items_list %}
+                <div class="col-sm-4">
+                    <div class="thumbnail item" style="position: relative;">
+
+                        {% if post.image %}
+                            <img src="{{ item.image.url }}" alt="" class="img-responsive">
+                        {% endif %}
+                        <div class="caption">
+                            <h5>{{ item.title }}
+                            </h5>
+                            <p>{{ item.price }} $</p>
+                            <p>{{ item.get_short_content|linebreaks|truncatechars:120 }}</p>
+                        </div>
+                        <div class="delete_item" data="{{ item.id }}"><span class="glyphicon glyphicon-remove"></span>
                         </div>
                     </div>
-                    <br>
-                {% endfor %}
+                </div>
+                {% if forloop.counter|divisibleby:3 %}</div>{% endif %}
+                {% if forloop.counter|divisibleby:3 %}
+                    <div class="row">{% endif %}
+            {% endfor %}
             </div>
-        </div>
+        {% if user_bucket_size != 0 %}
+            <button href="{% url 'store:make_order' %}" class="btn btn-primary make-order-btn">Buy</button>
+            <button href="{% url 'store:make_order' %}" class="btn btn-primary clean-bucket-btn">Clear bucket</button>
+        {% endif %}
     </div>
+{% endblock %}
+
+{% block ajax %}
+    <script>
+        $('.delete_item').click(function () {
+            var container = $(this).parent();
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'store:delete_from_bucket' %}",
+                data: {'id': this.getAttribute('data')},
+                dataType: "json",
+                success: function (data) {
+                    if (data['is_deleted'] === "success") {
+                        container.fadeOut(function () {
+                            this.hide()
+                        });
+                    }
+                }
+            }).done(function (data) {
+            });
+        });
+
+        $('.clean-bucket-btn').click(function () {
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'store:clean_bucket' %}",
+                data: {},
+                dataType: "json",
+                success: function (data) {
+                    if (data['is_cleaned'] === "success") {
+                        $('.item, .make-order-btn, .clean-bucket-btn').fadeOut(function () {
+                            this.hide()
+                        });
+                    }
+                }
+            }).done(function (data) {
+            });
+        });
+
+        $('.make-order-btn').click(function () {
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'store:make_order' %}",
+                data: {},
+                dataType: "json",
+                success: function (data) {
+                    if (data['is_ordered'] === "success") {
+                        $('.item, .make-order-btn, .clean-bucket-btn').fadeOut(function () {
+                            this.hide()
+                        });
+                        alert("Your order is in processing")
+                    } else if (data['is_ordered'] === "not_enough_items") {
+                        alert("We don't have this number of items")
+                    }else if (data['is_ordered'] === "empty_bucket") {
+                        alert("No items")
+                    }
+                }
+            }).done(function (data) {
+            });
+        });
+    </script>
 {% endblock %}

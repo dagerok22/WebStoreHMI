@@ -8,9 +8,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from store.models import Item, Bucket
+from store.models import Item, Bucket, Order
 
 
+@login_required
 def add_to_bucket(request):
     # TODO Changing number in card onSuccess of ajax query
     item_id = request.GET.get('id', None)
@@ -37,7 +38,34 @@ def user_bucket(request):
         "title": "Bucket of " + request.user.username,
         "user_bucket_size": len(items_list),
     }
-    return render(request, "store_list.html", context)
+    return render(request, "bucket.html", context)
+
+
+@login_required
+def delete_from_bucket(request):
+    user = request.user
+    bucket = Bucket.objects.get(user=user)
+    items_list = json.loads(bucket.items)
+    items_list.remove(request.GET.get('id', None))
+    bucket.items = json.dumps(items_list)
+    bucket.save()
+    data = {
+        'is_deleted': "success"
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def user_orders(request):
+    user = request.user
+    orders = Order.objects.all().filter(user=user)
+    # TODO number of items in order
+    # TODO price of an order
+    context = {
+        "title": user.username + " orders",
+        "order_list": orders
+    }
+    return render(request, "orders.html", context)
 
 
 def username_present(username):
@@ -91,11 +119,62 @@ def login_manager(request):
 
 
 @login_required
+def clean_bucket(request):
+    user = request.user
+    bucket = Bucket.objects.get(user=user)
+    bucket.items = "[]"
+    bucket.save()
+    data = {
+        'is_cleaned': "success"
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def make_order(request):
+    user = request.user
+    bucket = Bucket.objects.get(user=user)
+    if bucket.items == "[]":
+        data = {
+            'is_ordered': "empty_bucket"
+        }
+        return JsonResponse(data)
+    items_dict = dict()
+    for item_id in json.loads(bucket.items):
+        item = Item.objects.get(id=item_id)
+        if item in items_dict:
+            items_dict[item] += 1
+        else:
+            items_dict[item] = 1
+
+    for k, v in items_dict.items():
+        if k.number < v:
+            data = {
+                'is_ordered': "not_enough_items"
+            }
+            return JsonResponse(data)
+
+    new_order = Order.objects.create()
+    new_order.items = bucket.items
+    new_order.save()
+    bucket.items = "[]"
+    bucket.save()
+    for k, v in items_dict.items():
+        k.number -= v
+        k.save()
+    data = {
+        'is_ordered': "success"
+    }
+    return JsonResponse(data)
+
+
+@login_required
 def store_main(request):
-    items_list = Item.objects.all().order_by("price")
+    items_list = Item.objects.all().order_by("price").filter(number__gt=0)
     paginator = Paginator(items_list, 9)  # Show 25 contacts per page
     user = request.user
     user_bckt = Bucket.objects.get(user=user)
+    bucket_size = len(json.loads(user_bckt.items))
     page_request_var = "page"
     page = request.GET.get('page')
     try:
@@ -109,7 +188,7 @@ def store_main(request):
     context = {
         "items_list": queryset,
         "title": "Store",
-        "user_bucket_size": len(user_bckt),
+        "user_bucket_size": bucket_size,
         "page_request_var": page_request_var,
     }
     return render(request, "store_list.html", context)

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block head_title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+    <div class="com-sm-12">
+        <div class="page-header col-sm-12"><h1>{{ title }}</h1></div>
+        <hr>
+        <div class="row">
+            {% for order in order_list %}
+                <div class="col-sm-4">
+                    <div class="thumbnail item" style="position: relative;">
+                        <div class="caption">
+{#                            <h5>{{ order_number }}#}
+{#                            </h5>#}
+{#                            <p>{{ order.price }}</p>#}
+                            <p>{{ order.status }}</p>
+                            <p>{{ order.date }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% if forloop.counter|divisibleby:3 %}</div>{% endif %}
+                {% if forloop.counter|divisibleby:3 %}
+                    <div class="row">{% endif %}
+            {% endfor %}
+            </div>
+    </div>
+{% endblock %}

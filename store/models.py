@@ -22,5 +22,15 @@ class Bucket(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     items = models.TextField(default="")
 
-    def __len__(self):
-        return len(list(json.loads(self.items)))
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    items = models.TextField(default="")
+    price = models.IntegerField(default=0)
+    ORDER_STATUS = (
+        ("processing", "processing"),
+        ("dispatched", "dispatched"),
+        ("closed", "closed")
+    )
+    status = models.CharField(max_length=12, choices=ORDER_STATUS, default=ORDER_STATUS[0])
+    date = models.DateTimeField(auto_now=False, auto_now_add=True)

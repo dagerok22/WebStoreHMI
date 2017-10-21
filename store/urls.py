@@ -15,13 +15,18 @@ Including another URLconf
 """
 from django.conf.urls import url
 
-from store.views import store_main, add_to_bucket, login_manager, goto_login, sign_up, sign_in, sign_out, user_bucket
+from store.views import store_main, add_to_bucket, login_manager, goto_login, sign_up, sign_in, sign_out, user_bucket, \
+    delete_from_bucket, make_order, clean_bucket, user_orders
 
 urlpatterns = [
     url(r'^store/$', store_main, name='store'),
     url(r'^$', login_manager, name='login_manager'),
     url(r'^login/$', goto_login, name='login'),
     url(r'^bucket/$', user_bucket, name='user_bucket'),
+    url(r'^orders/$', user_orders, name='user_orders'),
+    url(r'^clean_bucket/$', clean_bucket, name='clean_bucket'),
+    url(r'^delete_from_bucket/$', delete_from_bucket, name='delete_from_bucket'),
+    url(r'^make_order/$', make_order, name='make_order'),
     url(r'^logout/$', sign_out, name='sign_out'),
     url(r'^sign_up/$', sign_up, name='sign_up'),
     url(r'^sign_in/$', sign_in, name='sign_in'),

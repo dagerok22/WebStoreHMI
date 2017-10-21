@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from store.models import Item, Bucket
+from store.models import Item, Bucket, Order
 
 
 class ItemsListAdmin(admin.ModelAdmin):
@@ -27,3 +27,17 @@ class BucketsListAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Bucket, BucketsListAdmin)
+
+
+class OrderListAdmin(admin.ModelAdmin):
+    list_display = ["user", "status", "date"]
+    list_filter = ["user", "date"]
+    list_editable = ["status"]
+
+    search_fields = ["user"]
+
+    class Meta:
+        model = Bucket
+
+
+admin.site.register(Order, OrderListAdmin)

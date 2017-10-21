@@ -16,6 +16,16 @@
             padding: 10px 20px;
             font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
         }
+        .orders-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            margin: 20px;
+            border-radius: 5px;
+            background: #eeeeee;
+            padding: 10px 20px;
+            font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+        }
     </style>
 {% endblock %}
 {% block content %}
@@ -35,6 +45,7 @@
                             </h5>
                             <p>{{ item.price }} $</p>
                             <p>{{ item.get_short_content|linebreaks|truncatechars:120 }}</p>
+                            <p>{{ item.number }}</p>
                             <p><span class="buy-btn btn btn-primary" data="{{ item.id }}">Add to bucket</span></p>
                         </div>
                     </div>
@@ -67,6 +78,9 @@
     <a href="{% url 'store:user_bucket' %}" class="bucket-btn">
         <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span>
         <span class="bucket_count">{{ user_bucket_size }}</span>
+    </a>
+    <a href="{% url 'store:user_orders' %}" class="orders-btn">
+        <span class="glyphicon glyphicon-th-large" aria-hidden="true"></span>
     </a>
 {% endblock %}
 
