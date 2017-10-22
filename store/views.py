@@ -68,6 +68,19 @@ def user_orders(request):
     return render(request, "orders.html", context)
 
 
+@login_required
+def manager_orders(request):
+    user = request.user
+    if not user.is_staff and user.is_superuser:
+        return redirect('store:store')
+    orders = Order.objects.all()
+    context = {
+        "title": "Orders",
+        "order_list": orders
+    }
+    return render(request, "orders_manager.html", context)
+
+
 def username_present(username):
     if User.objects.filter(username=username).exists():
         return True
@@ -82,11 +95,14 @@ def sign_out(request):
 def sign_up(request):
     username = request.POST.get('username', False)
     password = request.POST.get('password', False)
+    is_super = request.POST.get('is_super', False) == 'on'
     email = request.POST.get('email', False)
     if username_present(username):
         return redirect('store:login')
 
     new_user = User.objects.create_user(username, email, password)
+    new_user.is_staff = True
+    new_user.is_superuser = True
     new_user.save()
     bucket = Bucket.objects.create()
     bucket.user = new_user
@@ -147,7 +163,9 @@ def make_order(request):
         else:
             items_dict[item] = 1
 
+    price = 0
     for k, v in items_dict.items():
+        price += k.price * v
         if k.number < v:
             data = {
                 'is_ordered': "not_enough_items"
@@ -155,7 +173,9 @@ def make_order(request):
             return JsonResponse(data)
 
     new_order = Order.objects.create()
+    new_order.user = user
     new_order.items = bucket.items
+    new_order.price = price
     new_order.save()
     bucket.items = "[]"
     bucket.save()
@@ -171,7 +191,8 @@ def make_order(request):
 @login_required
 def store_main(request):
     items_list = Item.objects.all().order_by("price").filter(number__gt=0)
-    paginator = Paginator(items_list, 9)  # Show 25 contacts per page
+    item = items_list[0].image.url
+    paginator = Paginator(items_list, 6)  # Show 25 contacts per page
     user = request.user
     user_bckt = Bucket.objects.get(user=user)
     bucket_size = len(json.loads(user_bckt.items))
