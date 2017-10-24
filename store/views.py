@@ -33,10 +33,14 @@ def user_bucket(request):
     items_list = list()
     for id in ids_list:
         items_list.append(Item.objects.get(id=id))
+    full_price = 0
+    for item in items_list:
+        full_price += item.price
     context = {
         "items_list": items_list,
         "title": "Bucket of " + request.user.username,
         "user_bucket_size": len(items_list),
+        "full_price": full_price,
     }
     return render(request, "bucket.html", context)
 
@@ -101,8 +105,8 @@ def sign_up(request):
         return redirect('store:login')
 
     new_user = User.objects.create_user(username, email, password)
-    new_user.is_staff = True
-    new_user.is_superuser = True
+    new_user.is_staff = is_super
+    new_user.is_superuser = is_super
     new_user.save()
     bucket = Bucket.objects.create()
     bucket.user = new_user

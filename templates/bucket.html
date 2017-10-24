@@ -45,6 +45,11 @@
             {% endfor %}
             </div>
         {% if user_bucket_size != 0 %}
+            <div class="row full-price">
+                <div class="col-sm-5">
+                    <div>Full price: <strong>{{ full_price }}$</strong></div>
+                </div>
+            </div>
             <button href="{% url 'store:make_order' %}" class="btn btn-primary make-order-btn">Buy</button>
             <button href="{% url 'store:make_order' %}" class="btn btn-primary clean-bucket-btn">Clear bucket</button>
         {% endif %}
@@ -79,7 +84,7 @@
                 dataType: "json",
                 success: function (data) {
                     if (data['is_cleaned'] === "success") {
-                        $('.item, .make-order-btn, .clean-bucket-btn').fadeOut(function () {
+                        $('.item, .make-order-btn, .clean-bucket-btn, .full-price').fadeOut(function () {
                             this.hide()
                         });
                     }
@@ -96,13 +101,13 @@
                 dataType: "json",
                 success: function (data) {
                     if (data['is_ordered'] === "success") {
-                        $('.item, .make-order-btn, .clean-bucket-btn').fadeOut(function () {
+                        $('.item, .make-order-btn, .clean-bucket-btn, .full-price').fadeOut(function () {
                             this.hide()
                         });
                         alert("Your order is in processing")
                     } else if (data['is_ordered'] === "not_enough_items") {
                         alert("We don't have this number of items")
-                    }else if (data['is_ordered'] === "empty_bucket") {
+                    } else if (data['is_ordered'] === "empty_bucket") {
                         alert("No items")
                     }
                 }
