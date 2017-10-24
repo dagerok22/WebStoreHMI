@@ -190,8 +190,11 @@ def make_order(request):
 
 @login_required
 def store_main(request):
-    items_list = Item.objects.all().order_by("price").filter(number__gt=0)
-    item = items_list[0].image.url
+    if request.method == "GET":
+        items_list = Item.objects.all().order_by("price").filter(number__gt=0,
+                                                                 title__contains=request.GET.get('title', ""))
+    else:
+        items_list = Item.objects.all().order_by("price").filter(number__gt=0)
     paginator = Paginator(items_list, 6)  # Show 25 contacts per page
     user = request.user
     user_bckt = Bucket.objects.get(user=user)

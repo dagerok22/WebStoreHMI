@@ -16,6 +16,7 @@
             padding: 10px 20px;
             font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
         }
+
         .orders-btn {
             position: fixed;
             bottom: 0;
@@ -26,6 +27,7 @@
             padding: 10px 20px;
             font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
         }
+
         .manager-orders-btn {
             position: fixed;
             top: 0;
@@ -36,10 +38,26 @@
             padding: 10px 20px;
             font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
         }
+
+        .search-form {
+            position: fixed;
+            top: 0;
+            left: 100px;
+        }
     </style>
 {% endblock %}
 {% block content %}
 
+    <div class="col-sm-4" style="margin-top: 20px;">
+    <div class="row">
+            <form method="get" action="{% url 'store:store' %}" class="input-group">
+                  <span class="input-group-btn">
+                    <button class="btn btn-secondary" type="submit">Search</button>
+                  </span>
+                <input type="text" name="title" class="form-control" placeholder="Search for...">
+            </form>
+        </div>
+    </div>
     <div class="col-sm-12">
         <div class="page-header col-sm-12"><h1>{{ title }}</h1></div>
         <hr>
@@ -93,9 +111,9 @@
         <span class="glyphicon glyphicon-th-large" aria-hidden="true"></span>
     </a>
     {% if user.is_staff %}
-    <a href="{% url 'store:manager_orders' %}" class="manager-orders-btn">
-        <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-    </a>
+        <a href="{% url 'store:manager_orders' %}" class="manager-orders-btn">
+            <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+        </a>
     {% endif %}
 {% endblock %}
 
