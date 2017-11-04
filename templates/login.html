@@ -6,74 +6,102 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-6 col-md-offset-3">
-        <div class="panel panel-login">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-6">
-                        <a href="#" class="active" id="login-form-link">Login</a>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="panel panel-login">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <a href="#" class="active" id="login-form-link">Login</a>
+                        </div>
+                        <div class="col-xs-6">
+                            <a href="#" id="register-form-link">Register</a>
+                        </div>
                     </div>
-                    <div class="col-xs-6">
-                        <a href="#" id="register-form-link">Register</a>
-                    </div>
+                    <hr>
                 </div>
-                <hr>
-            </div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <form id="login-form" action="{% url 'store:sign_in' %}" method="post" role="form"  style="display: block;">{% csrf_token %}
-                            <div class="form-group">
-                                <input type="text" name="username" id="login-username" required tabindex="1"
-                                       class="form-control" placeholder="Username" value="">
-                            </div>
-                            <div class="form-group">
-                                <input type="password" name="password" id="login-password" required tabindex="2"
-                                       class="form-control" placeholder="Password">
-                            </div>
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-6 col-sm-offset-3">
-                                        <button type="submit" name="login-submit" id="login-submit"
-                                                class="form-control btn btn-login">Sign in</button>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <form id="login-form" action="{% url 'store:sign_in' %}" method="post" role="form"
+                                  style="display: block;">{% csrf_token %}
+                                <div class="form-group">
+                                    <input type="text" name="username" id="login-username" required tabindex="1"
+                                           class="form-control" placeholder="Username" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="password" id="login-password" required tabindex="2"
+                                           class="form-control" placeholder="Password">
+                                </div>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-6 col-sm-offset-3">
+                                            <button type="submit" name="login-submit" id="login-submit"
+                                                    class="form-control btn btn-login">Sign in
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                        <form id="register-form" action="{% url 'store:sign_up' %}" method="post" role="form" style="display: none;">{% csrf_token %}
-                            <div class="form-group">
-                                <input type="text" name="username" required id="register-username" tabindex="1"
-                                       class="form-control" placeholder="Username" value="">
-                            </div>
-                            <div class="form-group">
-                                <input type="email" name="email" required id="email" tabindex="1" class="form-control"
-                                       placeholder="Email Address" value="">
-                            </div>
-                            <div class="form-group">
-                                <input type="password" name="password" required id="register-password" tabindex="2"
-                                       class="form-control" placeholder="Password">
-                            </div>
-                            <div class="form-group text-center">
+                            </form>
+                            <form id="register-form" action="{% url 'store:sign_up' %}" method="post" role="form"
+                                  style="display: none;">{% csrf_token %}
+                                <div class="form-group">
+                                    <h6 class="label label-danger username-label"></h6>
+                                    <input type="text" name="username" required id="register-username" tabindex="1"
+                                           class="form-control" placeholder="Username" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" name="email" required id="email" tabindex="1"
+                                           class="form-control"
+                                           placeholder="Email Address" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="password" required id="register-password" tabindex="2"
+                                           class="form-control" placeholder="Password">
+                                </div>
+                                <div class="form-group text-center">
                                     <input type="checkbox" tabindex="3" class="" name="is_super" id="is-super">
                                     <label for="is_super"> Is super user?</label>
                                 </div>
 
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-sm-6 col-sm-offset-3 text-center">
-                                        <button type="submit" name="register-submit" id="register-submit"
-                                                class="btn btn-register">Sign up</button>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-6 col-sm-offset-3 text-center">
+                                            <button type="submit" name="register-submit" id="register-submit"
+                                                    class="btn btn-register">Sign up
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <script src="{% static 'login.js' %}"></script>
+
+    <script>
+
+        $('#register-username').on('change', function (e) {
+            console.log(this.value)
+            $.ajax({
+                method:'GET',
+                url: "{% url 'store:user_exists' %}",
+                data: {'username': this.value},
+                dataType: 'json',
+                success: function (data) {
+                    if (data['exists'] === true) {
+                        $('.username-label').text("User with such username already exists");
+                    }else {
+                        $('.username-label').text("")
+                    }
+                }
+            }).done(function (data) {
+                console.log(data)
+            });
+        })
+    </script>
 {% endblock %}

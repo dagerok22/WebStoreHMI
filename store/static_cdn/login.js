@@ -15,4 +15,22 @@ $(function () {
         e.preventDefault();
     });
 
+    console.log("here")
+    $('#register-username').addEventListener('change',function (e) {
+        console.log(this.value)
+        alert("")
+    //     $.ajax({
+    //     url: "/add/",
+    //     data: {'id': this.getAttribute('data')},
+    //     dataType: 'json',
+    //     success: function (data) {
+    //         if (data.get('is_added') === "success") {
+    //             $('.bucket-btn').value = $('.bucket-btn').value + 1
+    //         }
+    //     }
+    // }).done(function (data) {
+    //     console.log(data)
+    // });
+    })
+
 });

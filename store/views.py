@@ -85,10 +85,16 @@ def manager_orders(request):
     return render(request, "orders_manager.html", context)
 
 
-def username_present(username):
-    if User.objects.filter(username=username).exists():
-        return True
-    return False
+def username_exists_get(request):
+    exists = User.objects.filter(username=request.GET.get('username', "")).exists()
+    data = {
+        'exists': exists
+    }
+    return JsonResponse(data)
+
+
+def username_exists(username):
+    return User.objects.filter(username=username).exists()
 
 
 def sign_out(request):
@@ -101,7 +107,7 @@ def sign_up(request):
     password = request.POST.get('password', False)
     is_super = request.POST.get('is_super', False) == 'on'
     email = request.POST.get('email', False)
-    if username_present(username):
+    if username_exists(username):
         return redirect('store:login')
 
     new_user = User.objects.create_user(username, email, password)
@@ -118,7 +124,7 @@ def sign_up(request):
 def sign_in(request):
     username = request.POST.get('username', False)
     password = request.POST.get('password', False)
-    if not username_present(username):
+    if not username_exists(username):
         return redirect('store:login')
     user = User.objects.get(username=username)
     user = authenticate(username=username, password=password)
